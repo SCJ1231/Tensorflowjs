@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+        const t1 = tf.tensor1d([1, 2, 3, 4]);
+        const t2 = tf.tensor1d([10, 20, 30, 40]);
+
+        t1.add(t2).print(1)
+        console.log(tf.mul(t1, t2).data());
+        t1.add(t2).log().square().print(1);
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

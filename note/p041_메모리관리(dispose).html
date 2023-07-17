@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+        const log = console.log
+        log(tf.memory()) // numBytes:0
+        const a = tf.tensor2d([[1,2],[3,4]])  // numBytes:16 각각 4바이트씩 소모
+        const b = tf.tensor2d([5,6,7,8], [4,1]) // numBytes:32
+        log(tf.memory())
+        a.dispose() // 메모리 삭제
+        log(tf.memory()) // numBytes:16
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

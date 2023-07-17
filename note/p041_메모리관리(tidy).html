@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+        const prt = console.log
+        const t1 = tf.tensor1d([1,2,3])
+        prt(tf.memory());
+
+        const rt = tf.tidy(() => {  //메모리 누수를 막기 위해 별도의 변수에 지정 
+            return t1.log().square().round()
+        })
+        console.log(rt)
+        t1.dispose()
+        prt(tf.memory());
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
