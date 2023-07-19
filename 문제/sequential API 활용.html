@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+        const model = tf.sequential();
+        model.add(tf.layers.dense({units : 1, inputShape : [2]}));
+        model.compile({ loss : 'meanSquaredError', optimizer : 'adam'});
+        const xs = tf.tensor2d(
+            [
+                [0, 0],
+                [0, 1],
+                [1, 0],
+                [1, 1],
+            ],
+            [4, 2]
+        );
+        const ys = tf.tensor2d([0, 1, 1, 0], [4, 1]);
+        const fitParm = {
+            batchSize : 32,
+            epochs : 3000,
+            callback : {
+                onEpochEnd : (epoch, iogs) => {
+                    console.log('epoch', epoch, logs, 'RMSE=>', Math.sqrt(logs.loss))
+                }
+            }
+        }
+
+        model.fit(xs, ys, fitParm).then(() => {
+            model.predict(tf.tensor2d([1, 1], [1, 2])).print()
+        });
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+        // console.log(tf);
+        const model = tf.sequential(); // 1. 순차적API 모델
+        model.add(tf.layers.dense({units: 1, inputShape: [2]})); // 2. 레이어 생성 및 추가 , inputShape: 인풋모양, units: 다음엣지로 전달될 갯수
+        model.compile({ loss: 'meanSquaredError', optimizer: 'adam'}); // 3. 로스함수와 옵티마이져 , 경험적 선택
+        const xs = tf.tensor2d( // 4. 데이터를 텐서로 변환
+            [
+                [0, 0],
+                [0, 1],
+                [1, 0],
+                [1, 1],
+            ],
+            [4, 2]
+        );
+        const ys = tf.tensor2d([0, 1, 1, 0], [4, 1]); // 4. 데이터를 텐서로 변환
+
+        const fitParm = {
+            batchSize : 32, // Number of samples per gradient update. If unspecified, it will default to 32.
+            epochs : 5000,
+            callbacks : {
+                onEpochEnd : (epoch, logs) => {
+                    console.log('epoch', epoch, logs, 'RMSE=>', Math.sqrt(logs.loss));
+                }
+            }
+        }
+
+        model.fit(xs, ys, fitParm).then(() => { // 5. 모델을 핏하기
+            model.predict(tf.tensor2d([[1, 1]], [1, 2])).print(); // 6. 예측하기 
+        });
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

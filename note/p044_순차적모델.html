@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+        const model = tf.sequential({
+            layers : [
+                tf.layers.dense({inputShape : [784], units : 16, activation : 'relu'}),
+                tf.layers.dense({units : 10, activation : 'softmax'}),
+            ]
+        });
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script>
+        const input = tf.tensor1d([-2, 1, 0, 5])
+        const output = tf.layers
+        // .activation({ activation : 'relu' }) // 입력이 음수면 0을, 양수면 입력 값을 그대로 출력한다.
+        // .activation({ activation : 'sigmoid' }) // 입력의 절대값이 커지면 0이나 1로 수렴하게 된다.
+        .activation({ activation : 'tanh' }) // 시그모이드 함수의 범위를 -1에서 1로 확장한 개념 
+        .apply(input)
+        
+        output.print(1)
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
