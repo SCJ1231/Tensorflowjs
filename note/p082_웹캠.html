@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+</head>
+<body>
+    <script>
+        const video = document.createElement("video");
+        document.body.appendChild(video);
+        video.width = 500;
+        video.height = 500;
+        const main = async () => {
+            const cam = await tf.data.webcam(video)
+            img = await cam.capture();  // 캡쳐 기능 추가
+            img.print();
+        };
+        main();
+        
+    </script>
+</body>
+</html>

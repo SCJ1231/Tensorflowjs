@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+</head>
+<body>
+    <script>
+        /* 예측하기 준비 */
+        const preTemp = [34, 35, 36, 38];
+        const pretf = tf.tensor1d(preTemp);
+
+        tf.loadLayersModel("localstorage://ex7_2_data").then((model) => {
+            console.log('이전모델 로드됨');
+            model.predict(pretf).print();
+        })
+    </script>
+</body>
+</html>

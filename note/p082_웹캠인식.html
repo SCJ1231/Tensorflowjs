@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js"></script>
+    <!-- <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script> -->
+</head>
+<body>
+    <div id="display"></div>
+    <button id="pick">스캔</button>
+    <button id="stop">정지</button>
+    <div id="result"></div>
+    <script>
+        const video = document.createElement("video");
+        const display = document.getElementById("display")
+        const pick = document.getElementById("pick")
+        const stop = document.getElementById("stop")
+        const res = document.getElementById("result")
+        display.appendChild(video);
+
+        video.width = 700;
+        video.height = 700;
+
+        let stat;
+
+        (async () => {
+            const cam = await tf.data.webcam(video);
+            async function reload() {
+                const img = await cam.capture();
+                const net = await mobilenet.load()
+                const result = await net.classify(img);
+
+                res.innerHTML = 
+                "스캔중입니다...<hr>" + 
+                result[0].className + 
+                ":" + 
+                (result[0].probability* 100).toFixed(2) +
+                "%<br>" + 
+                result[1].className + 
+                ":" + 
+                (result[1].probability* 100).toFixed(2) +
+                "%";
+                tf.dispose(img);  // 출력하고 이미지 메모리 삭제
+                tf.dispose(net); // 메모리 누수막기
+            }
+
+        pick.addEventListener("click", () => {
+           stat = setInterval(reload, 1000); // 1초마다 계속 스캔을 시작
+           console.log(stat);
+        });
+        stop.addEventListener("click", () => {
+            clearInterval(stat);
+            console.log("정지", stat)
+        });
+    })();
+            
+       
+    </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+</head>
+<body>
+    <script>
+        /* 원시 데이터 */
+        const temp = [24, 26, 28, 30] // y = ax + b
+        const sell = [130, 140, 150, 160] // y = 5x + 10
+
+        const tftemp = tf.tensor1d(temp);
+        const tfsell = tf.tensor1d(sell);
+
+        /* 모델을 만들기 함수적 API */
+        const x = tf.input({ shape: [1] });
+        // const y = tf.layers.dense({ units: 8, activation: "relu" }).apply(x) // 은닉층
+        const z = tf.layers.dense({ units: 1 }).apply(x)// 은닉층
+        const model = tf.model({ inputs: x, outputs: z })
+
+        const param = {
+            optimizer: tf.train.adam(),
+            loss: tf.losses.meanSquaredError,
+            //metrics: "accuracy",
+            //metrics: tf.metrics.categoricalAccuracy(tftemp, tfsell),
+        };
+        model.compile(param); //컴파일
+
+        /* 훈련하기 */
+        const fitParam = {
+            epochs: 2000,
+            batchSize: 128,
+            callbacks: [
+                // tfvis.show.fitCallbacks({ name: "데이터 그래프", tab: "훈련" }, [
+                //     "loss",
+                //     "acc",
+                // ]),
+                {
+                    onEpochEnd: (epoch, logs) => {
+                        console.log(
+                            "epoch:",
+                            epoch,
+                            logs,
+                            "RMSE=>",
+                            Math.sqrt(logs.loss)
+                        );
+                    },
+                },
+            ],
+        };
+        (async () => {
+            await model.fit(tftemp, tfsell, fitParam);
+            await model.predict(tftemp).print();
+            await tfvis.show.modelSummary({ name: "요약", tab: "모델요약" }, model);
+            await tfvis.show.layer(
+                {
+                    name: "요약",
+                    tab: "가중치와 편향",
+                },
+                model.getLayer(undefined, 0)
+            );
+            await model.save('localstorage://ex7_2_data');
+            await console.log("모델이 저장 되었습니다.")
+            await pre();
+        })();
+
+        /* 새로운 데이터 예측 */
+        let kernel, bias, total;
+        async function pre(){
+            const result = model.predict(tf.tensor1d([34]));
+            await result.array().then((v) => (total = v[0][0]));
+
+            /* y = wx + b 에서 w 값 구하기 */
+            const weights = model.getWeights(); // w 구하기
+            console.log(weights)
+            await weights[0].array().then(v => (kernel = v[0][0]));
+            await weights[1].array().then(v => (bias = v[0]));
+            await console.log(`y=${kernel}x + ${bias}이고 34도일때 예측한 값은 ${
+                kernel * 34 + bias
+            } 즉, 예측 출력 된 ${total}이 된다.`
+            );
+        };
+    </script>
+</body>
+</html>

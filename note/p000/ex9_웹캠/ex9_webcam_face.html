@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+    <style>
+        body {
+            position: relative;
+        }
+        #canvas,
+        #video {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="display">
+        <canvas id="canvas" width="500" height="500"></canvas>
+    </div>
+    <h2 id="msg"></h2>
+    <script>
+        const display = document.getElementById("display")
+        const video = document.createElement("video")
+        const canvas = document.getElementById("canvas")
+        const msg = document.getElementById("msg")
+        const ctx = canvas.getContext("2d")
+
+        display.appendChild(video)
+        video.width = 600;
+        video.height = 500;
+
+        (async () => {
+            const cam = await tf.data.webcam(video);
+            async function scan() {
+                const img = await cam.capture();
+                const blaze = await blazeface.load();
+                const predictions = await blaze.estimateFaces(img);
+                console.log("측정인원수: " + predictions.length + '명');
+                msg.innerHTML = "측정인원수: " + predictions.length + '명';
+
+
+                /* 얼굴 사각형 그리기 */
+            if (predictions.length) {
+                for(let i = 0; i < predictions.length; i++){
+                    const start = predictions[i].topLeft;
+                    const end = predictions[i].bottomRight;
+                    const size = [end[0] - start[0], end[1] - start[1]]
+                    canvas.width = video.width;
+                    canvas.height = video.height;
+                    ctx.strokeStyle = "greenyellow";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(start[0], start[1], size[0], size[1])
+                }
+            }    
+            tf.dispose(img);
+            tf.dispose(blaze);
+        }
+            setInterval(scan, 500);
+    })(); 
+    </script>
+</body>
+</html>

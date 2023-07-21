@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+</head>
+<body>
+    <h1>다음 결과 값 예측하기</h1>
+    <input type="number" id="inputNumber" placeholder="숫자를 입력하세요">
+    <button onclick="predictNext()">예측</button>
+    <div id="output"></div>
+    <script>
+        const model = tf.sequential();
+
+// 입력 레이어 생성
+model.add(tf.layers.dense({ units: 1, inputShape: [1] }));
+
+// 출력 레이어 생성
+model.add(tf.layers.dense({ units: 1 }));
+
+// 옵티마이저와 손실 함수 설정
+model.compile({ optimizer: 'sgd', loss: 'meanSquaredError' });
+
+// 간단한 훈련 데이터 준비 (예시로 y = 2x + 1 함수를 학습시킴)
+const xs = tf.tensor2d([1, 2, 3, 4, 5, 6], [6, 1]);
+const ys = tf.tensor2d([3, 5, 7, 9, 11, 13], [6, 1]);
+
+// 100 epochs 동안 훈련
+model.fit(xs, ys, { epochs: 10000 }).then(() => {
+    console.log('훈련이 완료되었습니다.');
+});
+
+// 예측 함수
+function predictNext() {
+    // 입력값 가져오기
+    const inputNumber = parseInt(document.getElementById('inputNumber').value);
+
+    // TensorFlow.js Tensor로 변환
+    const inputTensor = tf.tensor2d([inputNumber], [1, 1]);
+
+    // 모델 예측
+    const outputTensor = model.predict(inputTensor);
+
+    // 예측 결과 출력
+    const outputElement = document.getElementById('output');
+    outputElement.innerHTML = `다음 값 예측: ${outputTensor.dataSync()[0].toFixed(2)}`;
+
+    // 메모리 정리
+    inputTensor.dispose();
+    outputTensor.dispose();
+}
+
+    </script>
+</body>
+</html>
