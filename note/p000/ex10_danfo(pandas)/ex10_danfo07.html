@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.2/lib/bundle.min.js"></script>
+</head>
+<body>
+    <script>
+        const data = { 
+             "A": [-20, 30, 47.3, -20] ,
+             "B": [34, -4, 5, 6] ,
+             "C": [20, 20, 30, 30]
+            };
+
+            const df = new dfd.DataFrame(data);
+            const tf_tensor = df.tensor;
+
+            console.log(tf_tensor);
+            console.log(tf_tensor.dtype);
+            tf_tensor.print();
+    </script>
+</body>
+</html>

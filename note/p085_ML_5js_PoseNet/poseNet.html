@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@2.2.2/dist/posenet.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@3.11.0/dist/tf-converter.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@0.0.6/dist/pose-detection.min.js"></script>
+    <style>
+        video,
+        canvas {
+            position: absolute;
+        }
+    </style>
+  </head>
+  <body>
+    <h1>PoseNet Training</h1>
+    <h2 id="result_label"></h2>
+    <div>
+      <video
+        src=""
+        id="video"
+        width="640"
+        height="480"
+        autoplay
+        muted
+        playsinline
+      ></video>
+      <canvas id="canvas">0</canvas>
+    </div>
+    <script src="./poseNet.js"></script>
+  </body>
+</html>

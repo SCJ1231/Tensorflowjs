@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.2/lib/bundle.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script> -->
+    <style>
+      body {
+        width: 100%;
+      }
+      #All {
+        margin: 10px;
+        width: 90%;
+        border: 1px solid gray;
+      }
+      #all {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+      button,
+      input {
+        margin: 0 10px;
+      }
+      button:hover {
+        box-shadow: inset 2px 2px 3px black;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="file" name="" id="up" />
+    <div id="All">
+      <div id="plot_div" style="width: 90%"></div>
+      <div id="all">
+        <span id="plot_span2" style="width: 30%"></span>
+        <span id="plot_span3" style="width: 30%"></span>
+        <span id="plot_span4" style="width: 30%"></span>
+      </div>
+    </div>
+    <button id="predict">분석</button>
+    <script>
+      const plot = document.getElementById("plot_div");
+      const input = document.getElementById("up");
+      const pre = document.getElementById("predict");
+      input.addEventListener("change", (ch) => {
+        // console.log(ch.target.files[0]);
+        dfd.readCSV(ch.target.files[0]).then((df) => {
+          df.print();
+          df.describe().print();
+          console.log(df.$dataIncolumnFormat);
+
+          pre.addEventListener("click", () => {
+            const dfs = df.$dataIncolumnFormat;
+            df.plot("plot_div").scatter({
+              config: { conlums: ["TV", "Newspaper", "Radio"] },
+            });
+            df.plot("plot_span2").scatter({ config: { x: "TV", y: "Sales" } });
+            df.plot("plot_span3").scatter({
+              config: { x: "Newspaper", y: "Sales" },
+            });
+            df.plot("plot_span4").scatter({
+              config: { x: "Radio", y: "Sales" },
+            });
+
+            /* vis로 그린 그래프 */
+            // const series1 = dfs[0].map((y, x) => ({ x, y }));
+            // const series2 = dfs[1].map((y, x) => ({ x, y }));
+            // const series3 = dfs[2].map((y, x) => ({ x, y }));
+            // const series4 = dfs[2].map((y, x) => ({ x, y }));
+
+            // const series = ["TV", "Radio", "Newspaper", "Sales"];
+            // const data = {
+            //   values: [series1, series2, series3, series4],
+            //   series,
+            // };
+
+            // const surface = { name: "Scatterplot", tab: "Charts" };
+            // tfvis.render.scatterplot(surface, data);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
