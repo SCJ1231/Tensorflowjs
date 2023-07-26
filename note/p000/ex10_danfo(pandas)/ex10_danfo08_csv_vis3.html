@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.2/lib/bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <style>
+      body {
+        width: 100%;
+      }
+      #All {
+        margin: 10px;
+        width: 90%;
+        border: 1px solid gray;
+      }
+      #all {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+      button,
+      input {
+        margin: 0 10px;
+      }
+      button:hover {
+        box-shadow: inset 2px 2px 3px black;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="file" name="" id="up" />
+    <div id="All">
+      <div id="plot_div" style="width: 90%"></div>
+      <div id="all">
+        <span id="plot_span2" style="width: 30%"></span>
+        <span id="plot_span3" style="width: 30%"></span>
+        <span id="plot_span4" style="width: 30%"></span>
+      </div>
+    </div>
+    <button id="predict">분석</button>
+    <script>
+      const plot = document.getElementById("plot_div");
+      const input = document.getElementById("up");
+      const pre = document.getElementById("predict");
+      input.addEventListener("change", (ch) => {
+        // console.log(ch.target.files[0]);
+        dfd.readCSV(ch.target.files[0]).then((df) => {
+          df.print();
+          df.describe().print();
+          console.log(df.$dataIncolumnFormat);
+          const dfs = df.$dataIncolumnFormat;
+          const dfa = dfs.map((val, ind) => {
+            return val.map((v, i) => {
+              return { x: v, y: dfs[3][i]};
+            });
+          });
+
+          const series = ['TV', 'radio', 'Newspaper', 'Sales'];
+          const data = { values: [dfa[0], dfa[1], dfa[2]], series };
+          const surface = { name: 'Scatterplot', tab: 'Charts' };
+          tfvis.render.scatterplot(plot, data)
+        });
+      });
+
+      // origin => 
+      // data => TV, Radio, Newspaper
+      // target => Sales
+
+      // Tensor 용
+      // TrainData => (TV, Radio, Newspaper) * 80%
+      // TestData => (TV, Radio, Newspaper) * 20%
+      // TrainTg => sales * 80%
+      // TestTg => sales * 20%
+
+    </script>
+  </body>
+</html>

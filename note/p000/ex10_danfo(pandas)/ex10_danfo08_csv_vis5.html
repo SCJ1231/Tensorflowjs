@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.2/lib/bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <style>
+      body {
+        width: 100%;
+      }
+      #All {
+        margin: 10px;
+        width: 90%;
+        border: 1px solid gray;
+      }
+      #all {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+      button,
+      input {
+        margin: 0 10px;
+      }
+      button:hover {
+        box-shadow: inset 2px 2px 3px black;
+        cursor: pointer;
+      }
+      [id^='plot_'] {
+        margin: 10px;
+        min-width: 400px;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="file" name="" id="up" />
+    <div id="All">
+      <div id="plot_div" style="width: 90%"></div>
+      <div id="plot_div2" style="width: 90%"></div>
+      <div id="all">
+        <!-- <span id="plot_span2" style="width: 30%"></span>
+        <span id="plot_span3" style="width: 30%"></span>
+        <span id="plot_span4" style="width: 30%"></span> -->
+      </div>
+    </div>
+    <button id="predict">분석</button>
+    <script>
+      const tf = dfd.tensorflow;
+      const plot = document.getElementById("plot_div");
+      const plot2 = document.getElementById("plot_div");
+      const input = document.getElementById("up");
+      const pre = document.getElementById("predict");
+      input.addEventListener("change", (ch) => {
+        // console.log(ch.target.files[0]);
+        dfd.readCSV(ch.target.files[0]).then((df) => {
+          df.print();
+          df.describe().print();
+          console.log(df.$dataIncolumnFormat);
+          const dfs = df.$dataIncolumnFormat;
+
+          /* 데이터 분리 */
+          
+          //Train
+          const dfTrainAll = dfs.map((val, ind) => {
+            return val.filter((v, i) => {
+              return i % 5 !== 0;
+            });
+          });
+
+          //Test
+          const dfTestAll = dfs.map((val, ind) => {
+            return val.filter((v, i) => {
+              return i % 5 === 0;
+            });
+          });
+
+          const dfTrainTg = dfTrainAll.pop();
+          const dfTestTg = dfTestAll.pop();
+          const dfTrain = dfTrainAll;
+          const dfTest = dfTestAll;
+
+          console.log(dfTrainTg);
+          console.log(dfTestTg);
+          console.log(dfTrain);
+          console.log(dfTest);
+
+          const dfTrainVis = dfTrain[0].map((v, i) => { // 80%
+            return{x: v, y: dfTrainTg[i]}
+          });
+          const dfTestVis = dfTest[0].map((v, i) => { //20% 
+            return{x: v, y: dfTestTg[i]}
+          });
+
+
+          const model = tf.sequential();
+          model.add(tf.layers.dense({ inputShape: [1], units: 1 }));
+          model.compile({
+            loss: 'meanSquaredError',
+            optimizer: 'adam',
+            lr: 0.1,
+          });
+
+          const fitParam = {
+            epochs: 1000,
+            callbacks: {
+              onEpochEnd: (e, l) => {
+                console.log('epoch', e, l, "RMSE=>", Math.sqrt(l.loss));
+              },
+            },
+          };    
+
+          /* 차트 1 */
+          const series = ['Train TV', 'Test TV'];
+          const data = { values: [dfTrainVis, dfTestVis], series };
+          // const surface = { name: 'Scatterplot', tab: 'Charts' };
+          tfvis.render.scatterplot(plot, data)
+
+          pre.addEventListener("click", async() => {
+            console.log(df.shape);
+            await model.fit(
+              tf.tensor(dfTrain[0]),
+              tf.tensor(dfTrainTg),
+              fitParam
+              );
+            const resultPre = await model.predict(tf.tensor(dfTest[0])).data();
+
+            const dfTestVis2 = Array.from(resultPre).map((v, i) => {
+              return {x: dfTest[0][i], y: v} // x: 20%의 Test TV, y: 그 예측값
+            });
+            console.log(dfTestVis2)
+            
+            /* 차트 2 */
+          const series2 = ['Predict TV', 'Test TV'];
+          const data2 = { values: [dfTestVis2, dfTestVis], series: series2 };
+          tfvis.render.scatterplot(plot2, data2)
+          });
+        });
+      });
+
+      // origin => 
+      // data => TV, Radio, Newspaper
+      // target => Sales
+
+      // Tensor 용
+      // TrainData => (TV, Radio, Newspaper) * 80%
+      // TestData => (TV, Radio, Newspaper) * 20%
+      // TrainTg => sales * 80%
+      // TestTg => sales * 20%
+
+    </script>
+  </body>
+</html>

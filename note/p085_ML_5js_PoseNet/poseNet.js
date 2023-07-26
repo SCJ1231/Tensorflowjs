@@ -2,7 +2,7 @@ const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 const result_label = document.getElementById("result_label");
-
+const button =  document.getElementById('button')
 navigator.mediaDevices
   .getUserMedia({ video: true, audio: false })
   .then(function (stream) {
@@ -14,8 +14,19 @@ posenet.load().then((model) => {
   video.onloadeddata = (e) => {
     console.log("정상");
     predict();
+    Capture();
   };
-
+  function Capture() {
+    model.estimateSinglePose(video).then((pose) => {
+      console.log(pose.keypoints)
+      if(keypoints[7].position[y] > keypoints[3].position[y]){
+        console.log('왼손을 들었습니다.')
+      }
+      else{
+        console.log('아무것도 없습니다.')
+      }
+    })
+  }
   function predict() {
     model.estimateSinglePose(video).then((pose) => {
       canvas.width = video.width;
@@ -25,6 +36,7 @@ posenet.load().then((model) => {
     });
     requestAnimationFrame(predict);
   }
+  
 });
 /* 기본 예시 복붙으로 사용하기 */
 const color = "blue";
