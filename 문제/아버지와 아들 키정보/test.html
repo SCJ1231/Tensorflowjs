@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <script src="
+https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js
+"></script>
+  </head>
+  <style>
+    body,
+    html {
+      width: 100%;
+      height: 100%;
+    }
+    #container {
+      width: 50%;
+      height: 50%;
+      margin: auto;
+      border-radius: 30px;
+      box-shadow: 3px 5px 10px rgb(248, 116, 116);
+      background: rgb(235, 159, 159);
+    }
+    #xlsx {
+      display: none;
+    }
+    #label_box {
+      display: inline-block;
+      margin: 10px;
+    }
+    #up {
+      display: inline-block;
+      border-radius: 10px;
+      width: 50px;
+      height: 50px;
+      background: cornflowerblue;
+      font-size: 2rem;
+      text-align: center;
+      color: #fff;
+      box-shadow: 2px 2px 3px rgb(45, 64, 99);
+    }
+    #info {
+      display: inline-block;
+    }
+    #add_file {
+      font-size: 2em;
+    }
+    #iv {
+      margin: 10px;
+      width: 60%;
+      height: 30px;
+      border: none;
+      border-radius: 10px;
+      background: beige;
+    }
+    #pre {
+      width: 100px;
+      height: 50px;
+      border: none;
+      border-radius: 20px;
+      background: gold;
+      transition: 0.15s linear;
+    }
+    #pre:hover {
+      transform: scale(1.05);
+      background: yellowgreen;
+    }
+  </style>
+  <body>
+    <div id="container">
+      <div id="label_box">
+        <input type="file" onchange="readExcel()" id="xlsx" />
+        <label for="xlsx"><div id="up">+</div> </label>
+        <div id="info">파일을 올려주세요.</div>
+      </div>
+      <hr />
+      <input type="text" id="iv" />
+      <button id="pre">분석시작</button>
+      <p id="pre_rst"></p>
+      <div id="plot_div"></div>
+      <div id="plot_div2"></div>
+    </div>
+
+    <script>
+      const plot = document.getElementById("plot_div");
+      const plot2 = document.getElementById("plot_div2");
+      const pre = document.getElementById("pre");
+      const p = document.getElementById("pre_rst");
+      const input = document.getElementById("iv");
+      /* 엑셀로부터 데이터 호출 */
+      const trainData = [];
+      const trainTgData = [];
+      //   const testData = [];
+      //   const testTgData = [];
+      const readExcel = () => {
+        const input = this.event.target;
+        const reader = new FileReader();
+        const info = document.getElementById("info");
+        reader.onload = function () {
+          info.textContent = input.files[0].name;
+          const data = reader.result;
+          const pvData = XLSX.read(data, { type: "binary" });
+          const x1 = pvData.Sheets.train;
+          //   const x2 = pvData.Sheets.test;
+          for (let i = 2; i < 756; i++) {
+            const trainArr = [],
+              targetArr = [];
+            trainArr.push(x1["A" + i].v); // train 시트가 x 변수에 담겨져있고 해당 키값의 v를 꺼내어 푸시
+            targetArr.push(x1["B" + i].v);
+            trainData.push(trainArr);
+            trainTgData.push(targetArr);
+          }
+
+          //   console.log(trainData, trainTgData);
+          //   console.log(testData, testTgData);
+        };
+        reader.readAsBinaryString(input.files[0]);
+      };
+
+      /* 1.지도학습 텐서준비 */
+      pre.addEventListener("click", () => {
+        p.innerHTML = "데이터 로딩중...";
+        const fatherHeight = parseFloat(input.value); // 원하는 아빠 키로 설정
+        console.log(fatherHeight);
+
+        const x = trainData; // traindata = 아빠키
+        const y = trainTgData; // targetdata = 아들키
+        const xt = tf.tensor(x);
+        const yt = tf.tensor(y);
+        /* 2. 모델 만들기 */
+        const xx = tf.input({ shape: [1] });
+        const h1 = tf.layers.dense({ units: 50, activation: "relu" }).apply(xx);
+        const h2 = tf.layers
+          .dense({ units: 25, activation: "sigmoid" })
+          .apply(h1);
+        const yy = tf.layers.dense({ units: 1 }).apply(h2);
+        const model = tf.model({ inputs: xx, outputs: yy });
+        const cparam = {
+          optimizer: tf.train.adam(),
+          loss: tf.losses.meanSquaredError,
+        };
+        model.compile(cparam);
+
+        /* 3. 모델로 훈련시작 */
+        const fparam = {
+          epochs: 1000,
+          //   batchSize: 32,
+          callbacks: {
+            onEpochEnd: (epoch, logs) => {
+              console.log(
+                "epoch:",
+                epoch,
+                logs,
+                "RMSE=>",
+                Math.sqrt(logs.loss)
+              );
+            },
+          },
+        };
+        model.fit(xt, yt, fparam).then(() => {
+          const preHeight = model
+            .predict(tf.tensor([[fatherHeight]]))
+            .dataSync()[0];
+          p.innerHTML = `아들의 예상 키는 ${preHeight.toFixed(1)}cm입니다.`;
+        });
+        chart();
+      });
+      const chart = async () => {
+        const series = ["Train TV", "Test Tv"];
+        const data = { values: [trainData, trainTgData], series };
+        // const surface = { name: "Scatterplot", tab: "Charts" };
+        await tfvis.render.scatterplot(plot, data);
+      };
+    </script>
+  </body>
+</html>

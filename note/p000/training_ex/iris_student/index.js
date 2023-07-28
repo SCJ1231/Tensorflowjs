@@ -157,7 +157,7 @@ const HOSTED_MODEL_JSON_URL =
  * 붓꽃 데모의 메인 함수
  */
 async function iris() {
-  const [xTrain, yTrain, xTest, yTest] = data.getIrisData(0.15);
+  const [xTrain, yTrain, xTest, yTest] = await data.getIrisData(0.15);
 
   const localLoadButton = document.getElementById('load-local');
   const localSaveButton = document.getElementById('save-local');

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <input type="file" onchange="readExcel()" />
+    <button onclick="modelRun()">분석시작</button>
+    <script>
+      /* 엑셀로부터 데이터 호출 */
+      const house = [];
+      const medv = [];
+
+      const readExcel = () => {
+        const input = this.event.target;
+        const reader = new FileReader();
+        
+        reader.onload = function () {
+          const data = reader.result;
+          const workBook = XLSX.read(data, { type: "binary" });
+          const x = workBook.Sheets.train;
+            console.log(workBook.Sheets);
+          for (let i = 2; i < 500; i++) {
+            const dataArr = [],
+              targetArr = [];
+            for (let j = 65; j < 66; j++) {
+              // 아스키코드 A-M 순회 N값은 결과값이라 제외
+              const str = String.fromCharCode(j) + i; // A(아스키코드65) + 2 즉 'A2' 가 됨.
+              dataArr.push({x:x[str].v,y:x[str].w}); // Data라는 시트가 x 변수에 담겨져있고 해당 키값의 v를 꺼내어 푸시
+            }
+            // targetArr.push(x["N" + i].v);
+            house.push(dataArr);
+            medv.push(targetArr);
+            // console.log(data);
+          }
+          console.log(house, medv);
+        };
+        reader.readAsBinaryString(input.files[0]);
+      };
+
+      /* 1.지도학습 텐서준비 */
+      const modelRun = () => {
+        const x = house;
+        const y = medv;
+        const xt = tf.tensor(x);
+        const yt = tf.tensor(y);
+
+        /* 2.모델만들기 */
+        const xx = tf.input({ shape: [13] }); // 값 넣기
+        const h1 = tf.layers.dense({ units: 26, activation: "relu" }).apply(xx);
+        const h2 = tf.layers
+          .dense({ units: 26, activation: "sigmoid" })
+          .apply(h1);
+        const yy = tf.layers.dense({ units: 1 }).apply(h2);
+        const model = tf.model({ inputs: xx, outputs: yy });
+        const cparam = {
+          optimizer: tf.train.adam(),
+          loss: tf.losses.meanSquaredError,
+        };
+        model.compile(cparam);
+        
+        /* 3.모델로 훈련시작 */
+        const fparam = {
+          epochs: 1000,
+          callbacks: {
+            onEpochEnd: (e, l) => {
+              console.log("eopch:", e, l, "RMSE=>", Math.sqrt(l.loss));
+            },
+          },
+        };
+        model.fit(xt, yt, fparam).then(() => model.predict(xt).print());
+      };
+    </script>
+  </body>
+</html>
